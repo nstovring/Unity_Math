@@ -1,14 +1,60 @@
 ﻿// Each #kernel tells which function to compile; you can have many kernels
 #pragma kernel CSMain
-
+#pragma kernel CSSetColorWhite
 // Create a RenderTexture with enableRandomWrite flag and set it
 // with cs.SetTexture
 RWTexture2D<float4> Result;
+RWTexture2D<float> Dye;
+RWTexture2D<float4> Velocity;
+
+float deltaTime;
+float diffusion_factor;
 
 [numthreads(8,8,1)]
 void CSMain (uint3 id : SV_DispatchThreadID)
 {
     // TODO: insert actual code here!
+    uint2 left = id.xy + uint2(-1, 0);
+    uint2 up = id.xy + uint2(0, 1);
+    uint2 right = id.xy + uint2(1, 0);
+    uint2 down = id.xy + uint2(0, -1);
+    float4 c_left = Result[left];
+    float4 c_up = Result[up];
+    float4 c_right = Result[right];
+    float4 c_down = Result[down];
 
-    Result[id.xy] = float4(id.x & id.y, (id.x & 15)/15.0, (id.y & 15)/15.0, 0.0);
+    float thresh = 0.5;
+
+    Dye[id.xy] = Dye[id.xy] + diffusion_factor * deltaTime * (Dye[left] + Dye[up] + Dye[right] + Dye[down] +(-4 * Dye[id.xy]));
+
+    Result[id.xy] = float4(1, 1, 1, 1) * Dye[id.xy];
+
+    //if(c_left.x > thresh || c_up.x > thresh || c_right.x > thresh || c_down.x > thresh){
+    //    Result[id.xy] += float4(1, 1, 1, 1) * deltaTime;
+    //}else{
+    //    //Result[id.xy] = float4(1, 1, 1, 1);
+    //}
+}
+
+
+[numthreads(8,8,1)]
+void CSSetColorWhite (uint3 id : SV_DispatchThreadID)
+{
+    int height, width;
+    Result.GetDimensions(height, width);
+    // TODO: insert actual code here!
+    uint2 center = uint2(height/2, width/2);
+
+    float4 color = float4(0.0, 0.0, 0.0, 0.0);
+    color = float4(0.0, 0.0, 0.0, 0.0);
+    float4 value = 0;
+    if(id.x == center.x){
+        if(id.y == center.y){
+            color = float4(1.0, 1.0, 1.0, 0.0);
+            value = 1000;
+        }
+    }
+
+    //Result[id.xy] = color;
+    Dye[id.xy] += value;
 }

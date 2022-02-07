@@ -313,6 +313,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   compute_shader: {fileID: 7200000, guid: 8d1854e820ee1f944bff508aa6281ca5, type: 3}
   render_texture: {fileID: 0}
+  dye_texture: {fileID: 0}
+  velocity_texture: {fileID: 0}
+  diffusion_factor: -10
+  sinPow: 0.1
 --- !u!850595691 &1243903462
 LightingSettings:
   m_ObjectHideFlags: 0
